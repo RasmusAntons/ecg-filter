@@ -9,12 +9,13 @@
 int filter_void(FILE *instream, FILE *outstream, struct file_attributes *attributes)
 {
     struct line_data line;
-
+    line.time = malloc(10 * sizeof(char));
     initialize(instream, outstream);
     while (get_next_line(&line, instream, attributes))
     {
         write_line(&line, outstream);
     }
+    free(line.time);
     return 1;
 }
 

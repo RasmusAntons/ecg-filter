@@ -3,61 +3,8 @@
 //
 
 #include <stdio.h>
-#include <math.h>
 #include <stdlib.h>
 #include "graph.h"
-
-int test_graph(char *file)
-{
-    int n, N=100;
-    double x[N], y[N], xmin, xmax, ymin, ymax;
-    for (n = 0; n < N; n++)
-    {
-        x[n] = n/10.0;
-        y[n] = cos(x[n]);
-
-        if (n==0)
-        {
-            xmin = x[0];
-            xmax = x[0];
-            ymin = y[0];
-            ymax = y[0];
-        }
-        if (x[n] < xmin) xmin = x[n];
-        if (x[n] > xmax) xmax = x[n];
-        if (y[n] < ymin) ymin = y[n];
-        if (y[n] > ymax) ymax = y[n];
-    }
-
-    int w = 1000, h = 200;
-
-    double left, right, top, bottom;
-    left = xmin - 0.1 * (xmax - xmin);
-    right = xmax + 0.1 * (xmax - xmin);
-    top = ymin - 0.1 * (ymax - ymin);
-    bottom = ymax + 0.1 * (ymax - ymin);
-
-    FILE *f = fopen(file, "w");
-    fprintf(f, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
-    fprintf(f, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%dpx\" height=\"%dpx\"", w, h);
-    fprintf(f, " viewBox=\"%lf %lf %lf %lf\"", left, top, right - left, bottom - top);
-    fprintf(f, " preserveAspectRatio=\"none\">\n");
-    fprintf(f, "<g transform=\"scale(1.0 -1.0)\">\n\n");
-
-    fprintf(f, "<polyline points=\"%lf,%lf %lf,%lf\"", left, 0.0, right, 0.0);
-    fprintf(f, " style=\"fill:none;stroke:grey;stroke-width:%lf\" />\n", 2 * (bottom - top) / h);
-    fprintf(f, "<polyline points=\"%lf,%lf %lf,%lf\"", 0.0, top, 0.0, bottom);
-    fprintf(f, " style=\"fill:none;stroke:grey;stroke-width:%lf\" />\n\n", 2 * (right - left) / w);
-
-    fprintf(f, "<polyline points=\"");
-    for (n = 0; n < N; n++) fprintf(f, "%lf,%lf ", x[n], y[n]);
-    fprintf(f, "\" style=\"fill:none;stroke:black;stroke-width:%lf\" />", 2 * (right - left) / w);
-
-    fprintf(f, "\n\n</g></svg>\n");
-    fclose(f);
-
-    return 1;
-}
 
 int export_graph(char *file,struct file_attributes *attributes, FILE *instream, FILE *outstream, int limit) {
     int n, N = attributes->lines;

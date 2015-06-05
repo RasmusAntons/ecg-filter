@@ -15,14 +15,14 @@ static char doc[] = "Applies a filter to an existing set of ecg data\ndata forma
 static char args_doc[] = "file";
 static struct argp_option options[] = {
         {"filter", 'f', "filter", 0, "apply this filter"},
-        {"graph", 'g', 0, 0, "graph it, doesn't work yet :^)"},
+        {"graph", 'g', "file", 0, "export graph as svg"},
         {"output", 'o', "file", 0, "output to file"},
         {0}
 };
 struct arguments {
     char *file;
     char *filter;
-    int graph;
+    char *graph;
     char *output;
 };
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
@@ -35,7 +35,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
             arguments->filter = arg;
             break;
         case 'g':
-            arguments->graph = 1;
+            arguments->graph = arg;
             break;
         case 'o':
             arguments->output = arg;
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 
     arguments.file = NULL;
     arguments.filter = NULL;
-    arguments.graph = 0;
+    arguments.graph = NULL;
     arguments.output = NULL;
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
 
     if (arguments.graph)
     {
-        export_graph("test.svg", &attributes, instream, outstream, 1500);
+        export_graph(arguments.graph, &attributes, instream, outstream, 1500);
     }
 
     fclose(instream);
