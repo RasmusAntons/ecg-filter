@@ -80,7 +80,7 @@ int filter_derivative(FILE *instream, FILE *outstream, struct file_attributes *a
 
 int filter_square(FILE *instream, FILE *outstream, struct file_attributes *attributes)
 {
-	struct line_data line;
+    struct line_data line;
     line.time = malloc(10 * sizeof(char));
     line.data = calloc(MAXCOLUMNS, sizeof(double));
     int c;
@@ -88,7 +88,7 @@ int filter_square(FILE *instream, FILE *outstream, struct file_attributes *attri
     while (get_next_line(&line, instream, attributes))
     {
         for (c = 0; c < attributes->columns; c++)
-		    line.data[c] = (line.data[c] * line.data[c]) * SQUARE_FACTOR;
+            line.data[c] = (line.data[c] * line.data[c]) * SQUARE_FACTOR;
         write_line(&line, attributes, outstream);
     }
     free(line.time);

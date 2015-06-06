@@ -118,6 +118,25 @@ int main(int argc, char **argv) {
         {
             filter_void(instream, outstream, &attributes);
         }
+        else if (!strcmp(arguments.filter, "all"))
+        {
+            FILE *tmp0 = tmpfile();
+            FILE *tmp1 = tmpfile();
+            filter_mean(instream, tmp0, &attributes, 5);
+            rewind(tmp0);
+            filter_mean(tmp0, tmp1, &attributes, 5);
+            rewind(tmp0);
+            rewind(tmp1);
+            filter_mean(tmp1, tmp0, &attributes, 5);
+            rewind(tmp0);
+            rewind(tmp1);
+            filter_derivative(tmp0, tmp1, &attributes);
+            rewind(tmp0);
+            rewind(tmp1);
+            filter_square(tmp1, outstream, &attributes);
+            fclose(tmp0);
+            fclose(tmp1);
+        }
         else
         {
             printf("Error: filter %s does not exist!\n", arguments.filter);
