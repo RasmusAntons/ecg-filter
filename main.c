@@ -105,6 +105,18 @@ int main(int argc, char **argv) {
         {
             filter_mean(instream, outstream, &attributes, 10);
         }
+        else if (!strcmp(arguments.filter, "derivative"))
+        {
+            filter_derivative(instream, outstream, &attributes);
+        }
+        else if (!strcmp(arguments.filter, "derivative"))
+        {
+            filter_derivative(instream, outstream, &attributes);
+        }
+        else if (!strcmp(arguments.filter, "square"))
+        {
+            filter_square(instream, outstream, &attributes);
+        }
         else if (!strcmp(arguments.filter, "none"))
         {
             filter_void(instream, outstream, &attributes);

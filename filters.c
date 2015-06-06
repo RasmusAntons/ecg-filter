@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include "filters.h"
 
+#define DERIVATIVE_FACTOR 3
+#define SQUARE_FACTOR 2
+
 int filter_void(FILE *instream, FILE *outstream, struct file_attributes *attributes)
 {
     struct line_data line;
@@ -48,5 +51,41 @@ int filter_mean(FILE *instream, FILE *outstream, struct file_attributes *attribu
     }
     free(line.time);
     free(olddata);
+    return 1;
+}
+
+int filter_derivative(FILE *instream, FILE *outstream, struct file_attributes *attributes)
+{
+    struct line_data line;
+    line.time = malloc(10 * sizeof(char));
+    struct line_data write;
+    write.data_0 = 0;
+    write.data_1 = 0;
+    initialize(instream, outstream);
+    while (get_next_line(&line, instream, attributes))
+    {
+        write.time = line.time;
+        write.data_0 = (line.data_0 - write.data_0) * DERIVATIVE_FACTOR;
+        write.data_1 = (line.data_1 - write.data_0) * DERIVATIVE_FACTOR;
+        write_line(&write, outstream);
+        write.data_0 = line.data_0;
+        write.data_1 = line.data_1;
+    }
+    free(line.time);
+    return 1;
+}
+
+int filter_square(FILE *instream, FILE *outstream, struct file_attributes *attributes)
+{
+	struct line_data line;
+    line.time = malloc(10 * sizeof(char));
+    initialize(instream, outstream);
+    while (get_next_line(&line, instream, attributes))
+    {
+		line.data_0 = (line.data_0 * line.data_0) * SQUARE_FACTOR;
+		line.data_1 = (line.data_1 * line.data_1) * SQUARE_FACTOR;
+        write_line(&line, outstream);
+    }
+    free(line.time);
     return 1;
 }
