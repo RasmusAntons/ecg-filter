@@ -8,8 +8,7 @@
 #include <values.h>
 #include "csv.h"
 
-#define MAXLENGTH 80
-#define SKIPLINES 2
+#define COLUMNS 2 /*TODO: detect number of columns*/
 
 int initialize(FILE *instream, FILE *outstream)
 {
@@ -41,7 +40,6 @@ int skip_head(FILE *instream)
 
 int get_next_line(struct line_data *line, FILE *instream, struct file_attributes *attributes)
 {
-    int n = 0;
     char buffer[MAXLENGTH];
 
     if (fgets(buffer, MAXLENGTH, instream) != NULL)
@@ -49,32 +47,30 @@ int get_next_line(struct line_data *line, FILE *instream, struct file_attributes
         if (attributes->empty)
         {
             attributes->empty = 0;
+            attributes->error = 0;
             attributes->lines = 0;
-            attributes->xmin = MAXDOUBLE;
-            attributes->xmax = MINDOUBLE;
             attributes->ymin = MAXDOUBLE;
             attributes->ymax = MINDOUBLE;
+            attributes->columns = 2;
         }
+        int n = 0;
         strncpy(line->time, buffer, 10);
         int i;
-        for (i = 0  ; i < 2; i++)
+        for (i = 0; i < COLUMNS; i++)
         {
-            double *target;
-            switch (i)
-            {
-                case 0: target = &line->data_0; break;
-                case 1: target = &line->data_1; break;
-                default: return 0;
-            }
             while (buffer[n] != ',')
             {
-                if (buffer[n] == '\0') return 0;
+                if (buffer[n] == '\0')
+                {
+                    attributes->error = 1;
+                    return 0;
+                }
                 n++;
             }
-            *target = atof(&buffer[++n]);
+            line->data[i] = atof(&buffer[++n]);
             attributes->lines++;
-            if (*target < attributes->ymin) attributes->ymin = *target;
-            if (*target > attributes->ymax) attributes->ymax = *target;
+            if (line->data[i] < attributes->ymin) attributes->ymin = line->data[i];
+            if (line->data[i] > attributes->ymax) attributes->ymax = line->data[i];
         }
         return 1;
     }
@@ -84,8 +80,12 @@ int get_next_line(struct line_data *line, FILE *instream, struct file_attributes
     }
 }
 
-int write_line(struct line_data *line, FILE *outstream)
+int write_line(struct line_data *line, struct file_attributes *attributes, FILE *outstream)
 {
-    fprintf(outstream, "%s,%1.3f,%1.3f\n", line->time, line->data_0, line->data_1);
+    fprintf(outstream, "%s", line->time);
+    int c;
+    for (c = 0; c < attributes->columns; c++)
+        fprintf(outstream, ",%1.3f", line->data[c]);
+    fprintf(outstream, "\n");
     return 1;
 }

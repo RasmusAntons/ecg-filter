@@ -7,6 +7,8 @@
 
 #include "csv.h"
 
+#define GRAPHLIMIT 1500
+
 int export_graph(char *file, struct file_attributes *attributes, FILE *instream, FILE *outstream, int limit);
 
 #endif //FILTER_GRAPH_H

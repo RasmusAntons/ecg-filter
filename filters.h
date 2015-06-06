@@ -7,6 +7,9 @@
 
 #include "csv.h"
 
+#define DERIVATIVE_FACTOR 3
+#define SQUARE_FACTOR 2
+
 int filter_void(FILE *instream, FILE *outstream, struct file_attributes *attributes);
 int filter_mean(FILE *instream, FILE *outstream, struct file_attributes *attributes, size_t n);
 int filter_derivative(FILE *instream, FILE *outstream, struct file_attributes *attributes);

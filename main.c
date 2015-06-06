@@ -85,6 +85,7 @@ int main(int argc, char **argv) {
     if (!outstream)
     {
         printf("Error: failed to create output file!\n");
+        fclose(instream);
         return EXIT_FAILURE;
     }
 
@@ -109,21 +110,19 @@ int main(int argc, char **argv) {
         {
             filter_derivative(instream, outstream, &attributes);
         }
-        else if (!strcmp(arguments.filter, "derivative"))
-        {
-            filter_derivative(instream, outstream, &attributes);
-        }
         else if (!strcmp(arguments.filter, "square"))
         {
             filter_square(instream, outstream, &attributes);
         }
-        else if (!strcmp(arguments.filter, "none"))
+        else if (!strcmp(arguments.filter, "void"))
         {
             filter_void(instream, outstream, &attributes);
         }
         else
         {
             printf("Error: filter %s does not exist!\n", arguments.filter);
+            fclose(instream);
+            fclose(outstream);
             return EXIT_FAILURE;
         }
     }
@@ -131,10 +130,23 @@ int main(int argc, char **argv) {
     {
         filter_void(instream, outstream, &attributes);
     }
+    if (attributes.error)
+    {
+        printf("Error: filter failed!\n");
+        fclose(instream);
+        fclose(outstream);
+        return EXIT_FAILURE;
+    }
 
     if (arguments.graph)
     {
-        export_graph(arguments.graph, &attributes, instream, outstream, 1500);
+        if (!export_graph(arguments.graph, &attributes, instream, outstream, GRAPHLIMIT))
+        {
+            printf("Error: could not create graph!\n");
+            fclose(instream);
+            fclose(outstream);
+            return EXIT_FAILURE;
+        }
     }
 
     fclose(instream);
