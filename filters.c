@@ -83,11 +83,12 @@ int filter_square(FILE *instream, FILE *outstream, struct file_attributes *attri
 	struct line_data line;
     line.time = malloc(10 * sizeof(char));
     line.data = calloc(MAXCOLUMNS, sizeof(double));
+    int c;
     initialize(instream, outstream);
     while (get_next_line(&line, instream, attributes))
     {
-		line.data[0] = (line.data[0] * line.data[0]) * SQUARE_FACTOR;
-		line.data[1] = (line.data[1] * line.data[1]) * SQUARE_FACTOR;
+        for (c = 0; c < attributes->columns; c++)
+		    line.data[c] = (line.data[c] * line.data[c]) * SQUARE_FACTOR;
         write_line(&line, attributes, outstream);
     }
     free(line.time);
