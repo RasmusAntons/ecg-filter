@@ -9,7 +9,7 @@
  * Some argp stuff
  * Documentation at http://www.gnu.org/software/libc/manual/html_node/Argp.html
  */
-const char *argp_program_version = "filter 0.01";
+const char *argp_program_version = "ecg-filter 0.01";
 const char *argp_program_bug_address = "<mail@rasmusantons.de>";
 static char doc[] = "Applies a filter to an existing set of ecg data\ndata format is csv (time, data_0, data_1)";
 static char args_doc[] = "file";
