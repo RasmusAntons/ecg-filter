@@ -6,30 +6,41 @@
 #include <stdlib.h>
 #include "filters.h"
 
+void init(struct line_data *line, struct line_data *write)
+{
+    line->time = malloc(10 * sizeof(int));
+    line->data = calloc(MAXCOLUMNS, sizeof(double));
+    if (write)
+    {
+        write->time = line->time;
+        write->data = calloc(MAXCOLUMNS, sizeof(double));
+    }
+}
+
+void cleanup(struct line_data *line, struct line_data *write)
+{
+    free(line->time);
+    free(line->data);
+    if (write)
+        free(write->data);
+}
+
 int filter_void(FILE *instream, FILE *outstream, struct file_attributes *attributes)
 {
     struct line_data line;
-    line.time = malloc(10 * sizeof(char));
-    line.data = calloc(MAXCOLUMNS, sizeof(double));
+    init(&line, NULL);
     initialize(instream, outstream);
     while (get_next_line(&line, instream, attributes))
-    {
         write_line(&line, attributes, outstream);
-    }
-    free(line.time);
+    cleanup(&line, NULL);
     return 1;
 }
 
 int filter_mean(FILE *instream, FILE *outstream, struct file_attributes *attributes, size_t n)
 {
-    n--;
-    double *olddata = calloc(MAXCOLUMNS * n, sizeof(double));
-    struct line_data line;
-    line.time = malloc(10 * sizeof(char));
-    line.data = calloc(MAXCOLUMNS, sizeof(double));
-    struct line_data write;
-    write.time = line.time;
-    write.data = calloc(MAXCOLUMNS, sizeof(double));
+    double *olddata = calloc(MAXCOLUMNS * (n - 1), sizeof(double));
+    struct line_data line, write;
+    init(&line, &write);
     int i, c, p = 0;
     initialize(instream, outstream);
     while (get_next_line(&line, instream, attributes))
@@ -37,31 +48,25 @@ int filter_mean(FILE *instream, FILE *outstream, struct file_attributes *attribu
         for (c = 0; c < attributes->columns; c++)
         {
             write.data[c] = line.data[c];
-            for (i = 0; i < n; i++)
+            for (i = 0; i < (n - 1); i++)
                 write.data[c] += olddata[i * attributes->columns + c];
-            write.data[c] /= n + 1;
+            write.data[c] /= n;
         }
         write_line(&write, attributes, outstream);
         for (c = 0; c < attributes->columns; c++)
             olddata[p + c] = line.data[c];
         p += attributes->columns;
-        p %= n * attributes->columns;
+        p %= (n - 1) * attributes->columns;
     }
-    free(line.time);
-    free(line.data);
-    free(write.data);
     free(olddata);
+    cleanup(&line, &write);
     return 1;
 }
 
 int filter_derivative(FILE *instream, FILE *outstream, struct file_attributes *attributes)
 {
-    struct line_data line;
-    line.time = malloc(10 * sizeof(char));
-    line.data = calloc(MAXCOLUMNS, sizeof(double));
-    struct line_data write;
-    write.time = line.time;
-    write.data = calloc(MAXCOLUMNS, sizeof(double));
+    struct line_data line, write;
+    init(&line, &write);
     int c;
     initialize(instream, outstream);
     while (get_next_line(&line, instream, attributes))
@@ -72,17 +77,14 @@ int filter_derivative(FILE *instream, FILE *outstream, struct file_attributes *a
         for (c = 0; c < attributes->columns; c++)
             write.data[c] = line.data[c];
     }
-    free(line.time);
-    free(line.data);
-    free(write.data);
+    cleanup(&line, &write);
     return 1;
 }
 
 int filter_square(FILE *instream, FILE *outstream, struct file_attributes *attributes)
 {
     struct line_data line;
-    line.time = malloc(10 * sizeof(char));
-    line.data = calloc(MAXCOLUMNS, sizeof(double));
+    init(&line, NULL);
     int c;
     initialize(instream, outstream);
     while (get_next_line(&line, instream, attributes))
@@ -91,7 +93,20 @@ int filter_square(FILE *instream, FILE *outstream, struct file_attributes *attri
             line.data[c] = (line.data[c] * line.data[c]) * SQUARE_FACTOR;
         write_line(&line, attributes, outstream);
     }
-    free(line.time);
-    free(line.data);
+    cleanup(&line, NULL);
+    return 1;
+}
+
+int filter_highpass(FILE *instream, FILE *outstream, struct file_attributes *attributes)
+{
+    struct line_data line, write;
+    init(&line, &write);
+    int c;
+    initialize(instream, outstream);
+    while (get_next_line(&line, instream, attributes))
+    {
+        continue;
+    }
+    cleanup(&line, &write);
     return 1;
 }

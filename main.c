@@ -125,14 +125,11 @@ int main(int argc, char **argv) {
             filter_mean(instream, tmp0, &attributes, 5);
             rewind(tmp0);
             filter_mean(tmp0, tmp1, &attributes, 5);
-            rewind(tmp0);
-            rewind(tmp1);
+            fclose(tmp0); tmp0 = tmpfile(); rewind(tmp1);
             filter_mean(tmp1, tmp0, &attributes, 5);
-            rewind(tmp0);
-            rewind(tmp1);
+            fclose(tmp1); tmp1 = tmpfile(); rewind(tmp0);
             filter_derivative(tmp0, tmp1, &attributes);
-            rewind(tmp0);
-            rewind(tmp1);
+            fclose(tmp0); tmp0 = tmpfile(); rewind(tmp1);
             filter_square(tmp1, outstream, &attributes);
             fclose(tmp0);
             fclose(tmp1);
