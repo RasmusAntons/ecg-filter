@@ -14,7 +14,7 @@ const char *argp_program_bug_address = "<mail@rasmusantons.de>";
 static char doc[] = "Applies a filter to an existing set of ecg data\ndata format is csv (time, data_0, data_1)";
 static char args_doc[] = "file";
 static struct argp_option options[] = {
-        {"filter", 'f', "filter", 0, "apply this filter"},
+        {"filters", 'f', "f0,f1,...,fn", 0, "apply these filters"},
         {"graph", 'g', "file", 0, "export graph as svg"},
         {"output", 'o', "file", 0, "output to file"},
         {0}
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
     struct arguments arguments;
 
     arguments.file = NULL;
-    arguments.filter = NULL;
+    arguments.filter = "void";
     arguments.graph = NULL;
     arguments.output = NULL;
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
@@ -92,60 +92,13 @@ int main(int argc, char **argv) {
     struct file_attributes attributes;
     attributes.empty = 1;
 
-    if (arguments.filter)
-    {
-        if (!strcmp(arguments.filter, "mean2"))
-        {
-            filter_mean(instream, outstream, &attributes, 2);
-        }
-        else if (!strcmp(arguments.filter, "mean5"))
-        {
-            filter_mean(instream, outstream, &attributes, 5);
-        }
-        else if (!strcmp(arguments.filter, "mean10"))
-        {
-            filter_mean(instream, outstream, &attributes, 10);
-        }
-        else if (!strcmp(arguments.filter, "derivative"))
-        {
-            filter_derivative(instream, outstream, &attributes);
-        }
-        else if (!strcmp(arguments.filter, "square"))
-        {
-            filter_square(instream, outstream, &attributes);
-        }
-        else if (!strcmp(arguments.filter, "void"))
-        {
-            filter_void(instream, outstream, &attributes);
-        }
-        else if (!strcmp(arguments.filter, "all"))
-        {
-            FILE *tmp0 = tmpfile();
-            FILE *tmp1 = tmpfile();
-            filter_mean(instream, tmp0, &attributes, 5);
-            rewind(tmp0);
-            filter_mean(tmp0, tmp1, &attributes, 5);
-            fclose(tmp0); tmp0 = tmpfile(); rewind(tmp1);
-            filter_mean(tmp1, tmp0, &attributes, 5);
-            fclose(tmp1); tmp1 = tmpfile(); rewind(tmp0);
-            filter_derivative(tmp0, tmp1, &attributes);
-            fclose(tmp0); tmp0 = tmpfile(); rewind(tmp1);
-            filter_square(tmp1, outstream, &attributes);
-            fclose(tmp0);
-            fclose(tmp1);
-        }
-        else
-        {
-            printf("Error: filter %s does not exist!\n", arguments.filter);
-            fclose(instream);
-            fclose(outstream);
-            return EXIT_FAILURE;
-        }
+    if (!choose_filter(arguments.filter, instream, outstream, &attributes)) {
+        // one filter does not exist, should already be printed
+        fclose(instream);
+        fclose(outstream);
+        return EXIT_FAILURE;
     }
-    else
-    {
-        filter_void(instream, outstream, &attributes);
-    }
+
     if (attributes.error)
     {
         printf("Error: filter failed!\n");
