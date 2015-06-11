@@ -9,7 +9,7 @@
 
 void init(struct line_data *line, struct line_data *write)
 {
-    line->time = malloc(10 * sizeof(int));
+    line->time = malloc(10 * sizeof(long));
     line->data = calloc(MAXCOLUMNS, sizeof(double));
     if (write)
     {
