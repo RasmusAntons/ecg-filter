@@ -9,7 +9,7 @@
 
 void init(struct line_data *line, struct line_data *write)
 {
-    line->time = malloc(10 * sizeof(long));
+    line->time = malloc(80 * sizeof(wchar_t));
     line->data = calloc(MAXCOLUMNS, sizeof(double));
     if (write)
     {
@@ -98,6 +98,23 @@ int filter_square(FILE *instream, FILE *outstream, struct file_attributes *attri
     return 1;
 }
 
+int filter_detect(FILE *instream, FILE *outstream, struct file_attributes *attributes)
+{
+    struct line_data line;
+    init(&line, NULL);
+    int c;
+    initialize(instream, outstream);
+    while (get_next_line(&line, instream, attributes))
+    {
+        for (c = 0; c < attributes->columns; c++)
+            line.data[c] = line.data[c] > .1 ? 1 : 0;
+        write_line(&line, attributes, outstream);
+    }
+    cleanup(&line, NULL);
+    return 1;
+}
+
+/*
 int filter_highpass(FILE *instream, FILE *outstream, struct file_attributes *attributes)
 {
     struct line_data line, write;
@@ -111,6 +128,7 @@ int filter_highpass(FILE *instream, FILE *outstream, struct file_attributes *att
     cleanup(&line, &write);
     return 1;
 }
+*/
 
 int choose_filter(char *filters, FILE *instream, FILE *outstream, struct file_attributes *attributes)
 {
@@ -119,6 +137,7 @@ int choose_filter(char *filters, FILE *instream, FILE *outstream, struct file_at
     size_t i = 0, j = 0;
     char *buffer = calloc(15, sizeof(int));
     while (filters[i] != '\0') {
+        attributes->lines = 0;
         i = j;
         while (filters[j] != ',' && filters[j] != '\0')
             j++;
@@ -161,6 +180,10 @@ int choose_filter(char *filters, FILE *instream, FILE *outstream, struct file_at
         else if (!strcmp(buffer, "square"))
         {
             success = filter_square(read, write, attributes);
+        }
+        else if (!strcmp(buffer, "detect"))
+        {
+            success = filter_detect(read, write, attributes);
         }
         else if (!strcmp(buffer, "void"))
         {

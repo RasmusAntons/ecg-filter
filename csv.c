@@ -53,6 +53,7 @@ int get_next_line(struct line_data *line, FILE *instream, struct file_attributes
             attributes->ymax = MINDOUBLE;
             attributes->columns = 2;
         }
+        attributes->lines++;
         int n = 0;
         strncpy(line->time, buffer, 10);
         int i;
@@ -68,7 +69,6 @@ int get_next_line(struct line_data *line, FILE *instream, struct file_attributes
                 n++;
             }
             line->data[i] = atof(&buffer[++n]);
-            attributes->lines++;
             if (line->data[i] < attributes->ymin) attributes->ymin = line->data[i];
             if (line->data[i] > attributes->ymax) attributes->ymax = line->data[i];
         }

@@ -16,6 +16,7 @@ static char args_doc[] = "file";
 static struct argp_option options[] = {
         {"filters", 'f', "f0,f1,...,fn", 0, "apply these filters"},
         {"graph", 'g', "file", 0, "export graph as svg"},
+        {"limit", 'l', "limit", 0, "maximum points in graph"},
         {"output", 'o', "file", 0, "output to file"},
         {0}
 };
@@ -23,6 +24,7 @@ struct arguments {
     char *file;
     char *filter;
     char *graph;
+    int limit;
     char *output;
 };
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
@@ -40,6 +42,15 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         case 'o':
             arguments->output = arg;
             break;
+        case 'l':
+            arguments->limit = atoi(arg);
+            if (arguments->limit <= 0)
+            {
+                printf("%s ist not a positive number (idiot)\n", arg);
+                arguments->limit = GRAPHLIMIT;
+            }
+            else
+                printf("limit graph to %d points\n", arguments->limit);
         case ARGP_KEY_ARG:
             if (state->arg_num >= 1)
                 argp_usage(state);
@@ -65,6 +76,7 @@ int main(int argc, char **argv) {
     arguments.file = NULL;
     arguments.filter = "void";
     arguments.graph = NULL;
+    arguments.limit = GRAPHLIMIT;
     arguments.output = NULL;
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
@@ -109,7 +121,7 @@ int main(int argc, char **argv) {
 
     if (arguments.graph)
     {
-        if (!export_graph(arguments.graph, &attributes, instream, outstream, GRAPHLIMIT))
+        if (!export_graph(arguments.graph, &attributes, instream, outstream, arguments.limit))
         {
             printf("Error: could not create graph!\n");
             fclose(instream);
