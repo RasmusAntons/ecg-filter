@@ -10,7 +10,7 @@ int print_values(int column, struct file_attributes *attributes, FILE *source, F
 {
     int n;
     struct line_data line;
-    line.time = malloc(80 * sizeof(wchar_t));
+    line.time = malloc(80 * sizeof(long));
     line.data = calloc(MAXCOLUMNS, sizeof(double));
     rewind(source);
     skip_head(source);
